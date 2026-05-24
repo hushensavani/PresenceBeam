@@ -17,6 +17,8 @@ Built with an extensible, provider-agnostic architecture — adding support for 
 
 🌐 **[hushensavani.github.io/PresenceBeam](https://hushensavani.github.io/PresenceBeam/)**
 
+![How it works — Microsoft Teams → PresenceBeam → Philips WiZ Bulb](docs/flow.png)
+
 ---
 
 ## ✨ Features
