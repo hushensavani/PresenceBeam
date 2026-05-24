@@ -4,3 +4,4 @@ data/.status_light_token_cache.json
 __pycache__/
 *.pyc
 *.pyo
+.idea
