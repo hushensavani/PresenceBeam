@@ -509,6 +509,53 @@
     .footer-links a {
       font-size: 0.85rem;
     }
+
+    .author-card {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 20px;
+      margin-bottom: 24px;
+      text-decoration: none;
+      transition: border-color 0.15s;
+    }
+
+    .author-card:hover {
+      border-color: var(--blue);
+      text-decoration: none;
+    }
+
+    .author-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0077b5, #00a0dc);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .author-info {
+      text-align: left;
+    }
+
+    .author-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .author-handle {
+      font-size: 0.8rem;
+      color: var(--blue);
+    }
   </style>
 </head>
 
@@ -835,7 +882,14 @@ TENANT_ID=your_tenant_id</pre>
   <footer>
     <div class="container">
       <p>🗨️🟢💡 <strong style="color:var(--text)">PresenceBeam</strong></p>
-      <p>Open source · MIT License · Built by <a href="https://www.linkedin.com/in/hushensavani/" target="_blank">Hushen Savani</a></p>
+      <p style="margin-bottom:20px">Open source · MIT License</p>
+      <a class="author-card" href="https://www.linkedin.com/in/hushensavani/" target="_blank">
+        <div class="author-avatar">HS</div>
+        <div class="author-info">
+          <div class="author-name">Hushen Savani</div>
+          <div class="author-handle">linkedin.com/in/hushensavani</div>
+        </div>
+      </a>
       <div class="footer-links">
         <a href="https://github.com/hushensavani/PresenceBeam" target="_blank">GitHub</a>
         <a href="https://github.com/hushensavani/PresenceBeam/blob/master/README.md" target="_blank">Docs</a>
