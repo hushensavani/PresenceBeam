@@ -1,0 +1,11 @@
+services:
+  teams-light-sync:
+    build: .
+    image: teams-light-sync
+    container_name: teams-light-sync
+    network_mode: host
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
