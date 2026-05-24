@@ -7,7 +7,7 @@ Read this file before making any code changes.
 
 ## Project Overview
 
-**StatusLightSync** is an open-source, extensible daemon that polls a user's
+**PresenceBeam** is an open-source, extensible daemon that polls a user's
 availability status from a workplace communication platform (e.g. Microsoft Teams,
 Slack) and reflects that status in real-time on a smart light bulb (e.g. Philips
 WiZ, TP-Link Tapo, Govee).
@@ -21,7 +21,7 @@ integrations live in isolated modules under `src/providers/` and `src/lights/`.
 ## Repository Layout
 
 ```
-TeamsLightSync/
+PresenceBeam/
 ├── src/
 │   ├── config.py                        # Env-driven config + global timestamp patch
 │   ├── engine.py                        # Core polling loop (provider/controller agnostic)

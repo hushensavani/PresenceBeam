@@ -1,8 +1,8 @@
-# 💡 StatusLightSync
+# 💡 PresenceBeam
 
 **Turn your smart bulb into a real-time status indicator for your workplace communication app.**
 
-StatusLightSync is an open-source daemon that polls your availability status from a communication platform (e.g. Microsoft Teams) and reflects it in real-time on a smart light bulb (e.g. Philips WiZ). When you're in a call, the bulb blinks red. When you're available, it glows green. When you go offline, it turns off.
+PresenceBeam is an open-source daemon that polls your availability status from a communication platform (e.g. Microsoft Teams) and reflects it in real-time on a smart light bulb (e.g. Philips WiZ). When you're in a call, the bulb blinks red. When you're available, it glows green. When you go offline, it turns off.
 
 Built with an extensible, provider-agnostic architecture — adding support for Slack, Zoom, TP-Link Tapo, Govee, or any other platform/bulb is as simple as adding a single class.
 
@@ -77,7 +77,7 @@ The **SyncEngine** is fully provider-agnostic. It knows nothing about Microsoft 
 ### Project Structure
 
 ```
-StatusLightSync/
+PresenceBeam/
 ├── src/
 │   ├── config.py                           # Environment-driven configuration + timestamp logging
 │   ├── engine.py                           # Core polling loop (provider/controller agnostic)
@@ -131,7 +131,7 @@ You need to register an app in Azure AD to get permission to read your Teams pre
 
 1. Go to [portal.azure.com](https://portal.azure.com)
 2. Navigate to **Azure Active Directory** → **App registrations** → **New registration**
-3. Name it anything (e.g. `StatusLightSync`), leave all other defaults
+3. Name it anything (e.g. `PresenceBeam`), leave all other defaults
 4. Click **Register**
 5. Note down the **Application (client) ID** and **Directory (tenant) ID** — you'll need these later
 
@@ -268,7 +268,7 @@ QUIET_HOURS_END=10:00
 
 ---
 
-## 🧩 Extending StatusLightSync
+## 🧩 Extending PresenceBeam
 
 The project is designed to be easily extended. You can add support for any communication platform or any smart bulb by implementing a single class.
 
