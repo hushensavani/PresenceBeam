@@ -53,7 +53,7 @@ Your job as a contributor is to implement one (or both) of these abstractions. Y
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-username/PresenceBeam.git
+git clone https://github.com/hushensavani/PresenceBeam.git
 cd PresenceBeam
 
 # Create a virtual environment
