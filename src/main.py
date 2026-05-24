@@ -30,8 +30,8 @@ from engine import SyncEngine
 
 def _resolve_cache_file() -> str:
     if os.getenv("IS_DOCKER"):
-        return "/app/data/.status_light_token_cache.json"
-    return os.path.expanduser("~/.status_light_token_cache.json")
+        return "/app/data/.presence_beam_token_cache.json"
+    return os.path.expanduser("~/.presence_beam_token_cache.json")
 
 
 def main():

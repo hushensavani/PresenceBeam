@@ -1,6 +1,6 @@
 .env
 .venv
-data/.status_light_token_cache.json
+data/.presence_beam_token_cache.json
 __pycache__/
 *.pyc
 *.pyo

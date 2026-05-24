@@ -1,8 +1,8 @@
 services:
-  teams-light-sync:
+  presence-beam:
     build: .
-    image: teams-light-sync
-    container_name: teams-light-sync
+    image: presence-beam
+    container_name: presence-beam
     network_mode: host
     env_file:
       - .env

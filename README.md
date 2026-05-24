@@ -2,6 +2,7 @@
 
 **Turn your smart bulb into a real-time status indicator for your workplace communication app.**
 
+[![CI](https://github.com/hushensavani/PresenceBeam/actions/workflows/build.yml/badge.svg)](https://github.com/hushensavani/PresenceBeam/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker&logoColor=white)](https://hub.docker.com/)
@@ -224,7 +225,7 @@ and enter the code XXXXXXXX to authenticate.
 2. Enter the code displayed
 3. Log in with your Microsoft work/school account
 
-The token is cached to `./data/.status_light_token_cache.json` (volume-mounted from the container). Subsequent runs authenticate silently — no user interaction needed.
+The token is cached to `./data/.presence_beam_token_cache.json` (volume-mounted from the container). Subsequent runs authenticate silently — no user interaction needed.
 
 **Useful Docker commands:**
 ```bash
@@ -240,8 +241,8 @@ docker compose down          # Stop and remove the container
 pip install -r requirements.txt
 
 # Create the token cache file with secure permissions
-touch ~/.status_light_token_cache.json
-chmod 600 ~/.status_light_token_cache.json
+touch ~/.presence_beam_token_cache.json
+chmod 600 ~/.presence_beam_token_cache.json
 
 # Run
 python src/main.py
@@ -249,7 +250,7 @@ python src/main.py
 
 On the first run, the same Microsoft device-flow prompt will appear directly in your terminal. Follow the instructions to authenticate.
 
-The token is cached to `~/.status_light_token_cache.json`. Subsequent runs authenticate silently.
+The token is cached to `~/.presence_beam_token_cache.json`. Subsequent runs authenticate silently.
 
 **To run in the background:**
 ```bash

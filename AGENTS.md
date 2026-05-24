@@ -138,8 +138,8 @@ WiZ, or any specific integration. It only operates on the abstractions.
 
 3. **`IS_DOCKER=1`** is baked into the `Dockerfile` via `ENV IS_DOCKER=1`.
    `main.py` uses this to switch the token cache path:
-   - Docker: `/app/data/.status_light_token_cache.json`
-   - Local:  `~/.status_light_token_cache.json`
+   - Docker: `/app/data/.presence_beam_token_cache.json`
+   - Local:  `~/.presence_beam_token_cache.json`
 
 4. **`STATUS_MAP` keys must match `get_status()` return values.**
    The engine passes `availability` strings directly from the provider into
@@ -207,8 +207,8 @@ ACTION REQUIRED: Authenticate with Microsoft
 ==================================================
 To sign in, visit https://microsoft.com/devicelogin and enter code XXXXXXXX
 ```
-After signing in, the token is cached to `data/.status_light_token_cache.json`
-(Docker) or `~/.status_light_token_cache.json` (local). Subsequent runs
+After signing in, the token is cached to `data/.presence_beam_token_cache.json`
+(Docker) or `~/.presence_beam_token_cache.json` (local). Subsequent runs
 authenticate silently with no user interaction required.
 
 ---
