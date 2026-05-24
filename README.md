@@ -1,4 +1,4 @@
-# 💡 PresenceBeam
+# 🗨️ PresenceBeam 🟢💡
 
 **Turn your smart bulb into a real-time status indicator for your workplace communication app.**
 
