@@ -388,7 +388,6 @@ class TplinkLightController(BaseLightController):
         "Presenting":     {"rgb": (255, 0, 0),   "brightness": 100},
         "Away":           {"rgb": (255, 200, 0), "brightness": 60},
         "BeRightBack":    {"rgb": (255, 200, 0), "brightness": 40},
-        "Focusing":       {"rgb": (0, 100, 255), "brightness": 60},
         "Offline":        None,
         "PresenceUnknown": {"rgb": (255, 0, 0),  "brightness": 80},
     }
@@ -493,7 +492,6 @@ class GoveeLightController(BaseLightController):
         "Presenting":     {"hsv": (0,   100, 100)},
         "Away":           {"hsv": (45,  100, 60)},   # yellow
         "BeRightBack":    {"hsv": (45,  80,  40)},
-        "Focusing":       {"hsv": (210, 100, 60)},   # blue
         "Offline":        None,
         "PresenceUnknown": {"hsv": (0,  100, 80)},
     }

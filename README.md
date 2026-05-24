@@ -45,7 +45,6 @@ The current implementation (Microsoft Teams → Philips WiZ) maps statuses as fo
 | Presenting | 🔴 Red | 255 | **Fast blinking** (0.4s) |
 | Away | 🟡 Yellow | 150 | Solid |
 | BeRightBack | 🟡 Yellow | 100 | Solid (dimmed) |
-| Focusing | 🔵 Blue | 160 | Solid |
 | Offline | ⚫ Off | — | Bulb off |
 | PresenceUnknown | 🔴 Red | 200 | **Blinking** |
 
@@ -105,6 +104,8 @@ PresenceBeam/
 ├── docker-compose.yml       # Production-ready compose file
 ├── requirements.txt         # Python dependencies
 ├── .env.example             # Configuration template
+├── docs/
+│   └── index.html           # GitHub Pages landing page
 ├── AGENTS.md                # Architecture context for AI agents and contributors
 ├── CONTRIBUTING.md          # How to add new providers and light controllers
 ├── LICENSE                  # MIT

@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PresenceBeam — Smart bulb status indicator</title>
+  <meta name="description" content="Sync your smart bulb to your workplace presence. In a call — bulb blinks red. Available — glows green. Open source, extensible, Dockerized." />
+
+  <style>
+    /* ── Reset & base ─────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d1117;
+      --surface:   #161b22;
+      --border:    #21262d;
+      --text:      #e6edf3;
+      --muted:     #8b949e;
+      --green:     #3fb950;
+      --red:       #f85149;
+      --yellow:    #e3b341;
+      --blue:      #58a6ff;
+      --purple:    #bc8cff;
+      --accent:    #3fb950;
+      --radius:    10px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 17px;
+      line-height: 1.7;
+    }
+
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.88em;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 1px 6px;
+    }
+
+    /* ── Layout ───────────────────────────────────────────────────────────── */
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    section { padding: 72px 0; }
+    section + section { border-top: 1px solid var(--border); }
+
+    h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.3px;
+    }
+
+    .section-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .section-sub {
+      color: var(--muted);
+      font-size: 1rem;
+      margin-bottom: 40px;
+      max-width: 560px;
+    }
+
+    /* ── Nav ──────────────────────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(13, 17, 23, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      font-size: 0.9rem;
+      transition: color 0.15s;
+    }
+
+    .nav-links a:hover { color: var(--text); text-decoration: none; }
+
+    /* ── Hero ─────────────────────────────────────────────────────────────── */
+    .hero {
+      padding: 96px 0 80px;
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .hero-emoji {
+      font-size: 3rem;
+      margin-bottom: 24px;
+      display: block;
+      line-height: 1;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 3.6rem);
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #e6edf3 0%, #8b949e 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-tagline {
+      font-size: 1.2rem;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto 36px;
+      line-height: 1.6;
+    }
+
+    .hero-tagline strong { color: var(--text); }
+
+    .hero-bullets {
+      display: flex;
+      justify-content: center;
+      gap: 28px;
+      flex-wrap: wrap;
+      margin-bottom: 44px;
+      list-style: none;
+      font-size: 0.95rem;
+    }
+
+    .hero-bullets li {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+    }
+
+    .hero-bullets li span.dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .dot-green  { background: var(--green); box-shadow: 0 0 8px var(--green); }
+    .dot-red    { background: var(--red);   box-shadow: 0 0 8px var(--red); }
+    .dot-yellow { background: var(--yellow); }
+    .dot-blue   { background: var(--blue); }
+    .dot-off    { background: #444; }
+
+    .cta-row {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 22px;
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      text-decoration: none;
+    }
+
+    .btn:hover { opacity: 0.85; text-decoration: none; transform: translateY(-1px); }
+
+    .btn-primary {
+      background: var(--green);
+      color: #0d1117;
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    /* ── How it works ─────────────────────────────────────────────────────── */
+    .flow {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0;
+    }
+
+    .flow-step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 28px;
+      text-align: center;
+      flex: 1;
+      min-width: 180px;
+      max-width: 230px;
+    }
+
+    .flow-icon {
+      font-size: 2.4rem;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .flow-step h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .flow-step p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .flow-arrow {
+      font-size: 1.4rem;
+      color: var(--border);
+      padding: 0 12px;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 600px) {
+      .flow { flex-direction: column; align-items: stretch; }
+      .flow-step { max-width: 100%; }
+      .flow-arrow { transform: rotate(90deg); text-align: center; }
+    }
+
+    /* ── Status map ───────────────────────────────────────────────────────── */
+    .status-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+    }
+
+    .status-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-dot.blink {
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    .status-dot.blink-fast {
+      animation: pulse 0.8s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.25; transform: scale(0.85); }
+    }
+
+    .status-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+      min-width: 160px;
+      flex-shrink: 0;
+    }
+
+    .status-desc {
+      font-size: 0.88rem;
+      color: var(--muted);
+      flex: 1;
+    }
+
+    .status-effect {
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+
+    .effect-solid   { background: rgba(255,255,255,0.07); color: var(--muted); }
+    .effect-blink   { background: rgba(248,81,73,0.15);   color: var(--red); }
+    .effect-off     { background: rgba(255,255,255,0.04); color: #555; }
+
+    @media (max-width: 580px) {
+      .status-name { min-width: unset; }
+      .status-desc { display: none; }
+    }
+
+    /* ── Features ─────────────────────────────────────────────────────────── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    .feature-icon {
+      font-size: 1.6rem;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .feature-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .feature-card p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    /* ── Quick start ──────────────────────────────────────────────────────── */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .step {
+      display: flex;
+      gap: 20px;
+    }
+
+    .step-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .step-body h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .step-body p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+
+    .codeblock {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      overflow-x: auto;
+    }
+
+    .codeblock pre {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.875rem;
+      line-height: 1.6;
+      color: var(--text);
+      white-space: pre;
+    }
+
+    .codeblock .comment { color: var(--muted); }
+    .codeblock .cmd     { color: var(--green); }
+
+    /* ── Extend ───────────────────────────────────────────────────────────── */
+    .extend-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 600px) { .extend-grid { grid-template-columns: 1fr; } }
+
+    .extend-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+
+    .extend-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .extend-card .extend-sub {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      list-style: none;
+    }
+
+    .chip {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .chip.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(63, 185, 80, 0.08);
+    }
+
+    /* ── Footer ───────────────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+      text-align: center;
+    }
+
+    footer p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    footer a { color: var(--muted); }
+    footer a:hover { color: var(--text); }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .footer-links a {
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── Nav ──────────────────────────────────────────────────────────────── -->
+  <nav>
+    <div class="nav-inner">
+      <span class="nav-logo">🗨️ PresenceBeam</span>
+      <div class="nav-links">
+        <a href="#how-it-works">How it works</a>
+        <a href="#quick-start">Quick start</a>
+        <a href="https://github.com/hushensavani/PresenceBeam" target="_blank">GitHub ↗</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Hero ─────────────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="container">
+      <span class="hero-emoji">🗨️🟢💡</span>
+      <h1>PresenceBeam</h1>
+      <p class="hero-tagline">
+        Your smart bulb becomes a <strong>real-time presence indicator</strong>
+        for your workplace chat app. No screen-checking required.
+      </p>
+
+      <ul class="hero-bullets">
+        <li><span class="dot dot-green"></span> Available → green</li>
+        <li><span class="dot dot-red blink"></span> In a call → red blinking</li>
+        <li><span class="dot dot-yellow"></span> Away → yellow</li>
+        <li><span class="dot dot-off"></span> Offline → off</li>
+      </ul>
+
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#quick-start">Get started</a>
+        <a class="btn btn-secondary" href="https://github.com/hushensavani/PresenceBeam" target="_blank">
+          ★ View on GitHub
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── How it works ─────────────────────────────────────────────────────── -->
+  <section id="how-it-works">
+    <div class="container">
+      <p class="section-label">How it works</p>
+      <h2>Three moving parts. Zero complexity.</h2>
+      <p class="section-sub">
+        PresenceBeam sits in the background and bridges your chat app to your bulb.
+        You never touch it after setup.
+      </p>
+
+      <div class="flow">
+        <div class="flow-step">
+          <span class="flow-icon">💬</span>
+          <h3>Chat app</h3>
+          <p>Microsoft Teams reports your current presence status via the Graph API</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <span class="flow-icon">⚙️</span>
+          <h3>PresenceBeam</h3>
+          <p>Polls every 5–30 seconds and translates status into a light command</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <span class="flow-icon">💡</span>
+          <h3>Smart bulb</h3>
+          <p>Philips WiZ changes color, brightness, or blink pattern instantly over Wi-Fi</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Status map ────────────────────────────────────────────────────────── -->
+  <section id="status-map">
+    <div class="container">
+      <p class="section-label">Status mapping</p>
+      <h2>Every status has a meaning.</h2>
+      <p class="section-sub">
+        Microsoft Teams presence states map to distinct colors and effects
+        so anyone nearby can read the signal at a glance.
+      </p>
+
+      <div class="status-grid">
+
+        <div class="status-row">
+          <span class="status-dot" style="background:var(--green); box-shadow:0 0 8px var(--green)"></span>
+          <span class="status-name">Available</span>
+          <span class="status-desc">Free to talk, actively at desk</span>
+          <span class="status-effect effect-solid">Solid green</span>
+        </div>
+
+        <div class="status-row">
+          <span class="status-dot" style="background:var(--green); opacity:0.5"></span>
+          <span class="status-name">Available (idle)</span>
+          <span class="status-desc">Available but stepped away briefly</span>
+          <span class="status-effect effect-solid">Dim green</span>
+        </div>
+
+        <div class="status-row">
+          <span class="status-dot" style="background:var(--red); box-shadow:0 0 8px var(--red)"></span>
+          <span class="status-name">Busy</span>
+          <span class="status-desc">Occupied, prefer not to be disturbed</span>
+          <span class="status-effect effect-solid">Solid red</span>
+        </div>
+
+        <div class="status-row">
+          <span class="status-dot" style="background:var(--red); opacity:0.5"></span>
+          <span class="status-name">Busy (idle)</span>
+          <span class="status-desc">Was busy, now briefly paused</span>
+          <span class="status-effect effect-solid">Dim red</span>
+        </div>
+
+        <div class="status-row">
+          <span class="status-dot" style="background:var(--red); box-shadow:0 0 8px var(--red)"></span>
+          <span class="status-name">In a Meeting</span>
+          <span class="status-desc">Calendar meeting in progress</span>
+          <span class="status-effect effect-solid">Solid red</span>
+        </div>
+
+        <div class="status-row">
+          <span class="status-dot blink" style="background:var(--red); box-shadow:0 0 8px var(--red)"></span>
+          <span class="status-name">In a Call</span>
+          <span class="status-desc">Active voice or video call — do not disturb</span>
+          <span class="status-effect effect-blink">Blinking red</span>
+        </div>
+
+        <div class="status-row">
+          <span class="status-dot blink" style="background:var(--red); box-shadow:0 0 8px var(--red)"></span>
+          <span class="status-name">Do Not Disturb</span>
+          <span class="status-desc">Manually set — absolutely no interruptions</span>
+          <span class="status-effect effect-blink">Blinking red</span>
+        </div>
+
+        <div class="status-row">
+          <span class="status-dot blink-fast" style="background:var(--red); box-shadow:0 0 8px var(--red)"></span>
+          <span class="status-name">Presenting</span>
+          <span class="status-desc">Screen sharing or presenting to an audience</span>
+          <span class="status-effect effect-blink">Fast blinking red</span>
+        </div>
+
+        <div class="status-row">
+          <span class="status-dot" style="background:var(--yellow); box-shadow:0 0 6px var(--yellow)"></span>
+          <span class="status-name">Away</span>
+          <span class="status-desc">Away from keyboard</span>
+          <span class="status-effect effect-solid">Solid yellow</span>
+        </div>
+
+        <div class="status-row">
+          <span class="status-dot" style="background:var(--yellow); opacity:0.5"></span>
+          <span class="status-name">Be Right Back</span>
+          <span class="status-desc">Short break, returning soon</span>
+          <span class="status-effect effect-solid">Dim yellow</span>
+        </div>
+
+
+        <div class="status-row">
+          <span class="status-dot" style="background:#333"></span>
+          <span class="status-name">Offline</span>
+          <span class="status-desc">Signed out or unreachable</span>
+          <span class="status-effect effect-off">Bulb off</span>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Features ──────────────────────────────────────────────────────────── -->
+  <section id="features">
+    <div class="container">
+      <p class="section-label">Features</p>
+      <h2>Built for real-world use.</h2>
+      <p class="section-sub">Small details that make it reliable enough to leave running all day.</p>
+
+      <div class="features-grid">
+
+        <div class="feature-card">
+          <span class="feature-icon">⚡</span>
+          <h3>Real-time sync</h3>
+          <p>Bulb color changes within seconds of your status changing. No manual refresh.</p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">📡</span>
+          <h3>Adaptive polling</h3>
+          <p>Polls every 5 seconds when you're available, every 30 seconds during meetings. Fewer API calls, same responsiveness.</p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">🌙</span>
+          <h3>Quiet hours</h3>
+          <p>Automatically turns the bulb off and pauses polling after hours. Set your window — it handles the rest.</p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">🔑</span>
+          <h3>Authenticate once</h3>
+          <p>Microsoft auth token is cached to disk. Sign in once — it runs silently from then on.</p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">🐳</span>
+          <h3>Dockerized</h3>
+          <p>One command to run as a background container. Restarts automatically on reboot.</p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">🧩</span>
+          <h3>Extensible</h3>
+          <p>Swap the chat platform or smart bulb by changing two lines. No engine changes required.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Quick start ────────────────────────────────────────────────────────── -->
+  <section id="quick-start">
+    <div class="container">
+      <p class="section-label">Quick start</p>
+      <h2>Up and running in minutes.</h2>
+      <p class="section-sub">Docker is the easiest path. Python 3.11+ works just as well if you prefer running it directly.</p>
+
+      <div class="steps">
+
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h3>Register a free Azure app</h3>
+            <p>
+              Go to <a href="https://portal.azure.com" target="_blank">portal.azure.com</a> →
+              App registrations → New registration. Add the <code>Presence.Read</code> delegated
+              permission and enable public client flows. Takes about 5 minutes.
+            </p>
+            <p>Note down your <strong>Client ID</strong> and <strong>Tenant ID</strong>.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h3>Configure your environment</h3>
+            <div class="codeblock">
+<pre><span class="comment"># Copy the template</span>
+<span class="cmd">cp .env.example .env</span>
+
+<span class="comment"># Fill in these three values</span>
+BULB_IP=192.168.1.100
+CLIENT_ID=your_client_id
+TENANT_ID=your_tenant_id</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h3>Run with Docker</h3>
+            <div class="codeblock">
+<pre><span class="cmd">docker compose up -d --build</span>
+<span class="cmd">docker compose logs -f</span>     <span class="comment"># watch for the auth prompt</span></pre>
+            </div>
+            <p style="margin-top:12px">
+              On first run you'll see a Microsoft device-flow prompt in the logs.
+              Visit the URL, enter the code, sign in — done.
+              Every run after that is fully silent.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Extend ─────────────────────────────────────────────────────────────── -->
+  <section id="extend">
+    <div class="container">
+      <p class="section-label">Extensible by design</p>
+      <h2>Add any platform. Add any bulb.</h2>
+      <p class="section-sub">
+        The engine is fully provider-agnostic. Implement one class, wire up two lines in
+        <code>main.py</code>, and everything else — quiet hours, adaptive polling,
+        token refresh — just works.
+      </p>
+
+      <div class="extend-grid">
+        <div class="extend-card">
+          <h3>💬 Presence providers</h3>
+          <p class="extend-sub">Add any workplace chat platform</p>
+          <ul class="chip-list">
+            <li class="chip active">Microsoft Teams ✓</li>
+            <li class="chip">Slack</li>
+            <li class="chip">Zoom</li>
+            <li class="chip">Google Chat</li>
+            <li class="chip">Webex</li>
+            <li class="chip">Discord</li>
+          </ul>
+        </div>
+        <div class="extend-card">
+          <h3>💡 Light controllers</h3>
+          <p class="extend-sub">Add any smart bulb or strip</p>
+          <ul class="chip-list">
+            <li class="chip active">Philips WiZ ✓</li>
+            <li class="chip">TP-Link Tapo</li>
+            <li class="chip">Govee</li>
+            <li class="chip">LIFX</li>
+            <li class="chip">Nanoleaf</li>
+            <li class="chip">Yeelight</li>
+          </ul>
+        </div>
+      </div>
+
+      <p style="margin-top:24px; font-size:0.9rem; color:var(--muted)">
+        See
+        <a href="https://github.com/hushensavani/PresenceBeam/blob/master/CONTRIBUTING.md" target="_blank">CONTRIBUTING.md</a>
+        for step-by-step guides with full code examples.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── Footer ─────────────────────────────────────────────────────────────── -->
+  <footer>
+    <div class="container">
+      <p>🗨️🟢💡 <strong style="color:var(--text)">PresenceBeam</strong></p>
+      <p>Open source · MIT License · Built by <a href="https://www.linkedin.com/in/hushensavani/" target="_blank">Hushen Savani</a></p>
+      <div class="footer-links">
+        <a href="https://github.com/hushensavani/PresenceBeam" target="_blank">GitHub</a>
+        <a href="https://github.com/hushensavani/PresenceBeam/blob/master/README.md" target="_blank">Docs</a>
+        <a href="https://github.com/hushensavani/PresenceBeam/blob/master/CONTRIBUTING.md" target="_blank">Contributing</a>
+        <a href="https://github.com/hushensavani/PresenceBeam/issues" target="_blank">Issues</a>
+        <a href="https://github.com/hushensavani/PresenceBeam/blob/master/LICENSE" target="_blank">License</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
