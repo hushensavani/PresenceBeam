@@ -96,7 +96,9 @@ PresenceBeam/
 ├── docker-compose.yml       # Production-ready compose file
 ├── requirements.txt         # Python dependencies
 ├── .env.example             # Configuration template
-├── AGENTS.md                # Context for AI agents and contributors
+├── AGENTS.md                # Architecture context for AI agents and contributors
+├── CONTRIBUTING.md          # How to add new providers and light controllers
+├── LICENSE                  # MIT
 └── README.md                # This file
 ```
 
@@ -270,122 +272,9 @@ QUIET_HOURS_END=10:00
 
 ## 🧩 Extending PresenceBeam
 
-The project is designed to be easily extended. You can add support for any communication platform or any smart bulb by implementing a single class.
+PresenceBeam is designed to be extended. Adding support for a new communication platform (Slack, Zoom, Google Chat…) or a new smart bulb (TP-Link Tapo, Govee, LIFX…) requires implementing a single class and wiring it up in two lines.
 
-### Adding a New Presence Provider
-
-For example, adding **Slack** support:
-
-**Step 1** — Create the module:
-```
-src/providers/slack/__init__.py
-src/providers/slack/slack_presence_provider.py
-```
-
-**Step 2** — Subclass `BasePresenceProvider`:
-```python
-from core.base_presence_provider import BasePresenceProvider
-
-class SlackPresenceProvider(BasePresenceProvider):
-    """Fetches user presence from the Slack API."""
-
-    NON_CRITICAL_STATUSES: set[str] = {"active"}
-
-    def __init__(self, slack_token: str):
-        self._token = slack_token
-
-    def authenticate(self) -> None:
-        # Validate token or perform OAuth flow
-        ...
-
-    def get_status(self) -> tuple[str, str]:
-        # Call Slack API, return (availability, activity)
-        # Raise RuntimeError("Token expired") on 401 to trigger re-auth
-        ...
-
-    def on_token_expired(self) -> None:
-        # Re-authenticate
-        self.authenticate()
-```
-
-**Step 3** — Wire it up in `src/main.py` (change two lines):
-```python
-# Replace:
-from providers.ms_teams.teams_presence_provider import TeamsPresenceProvider
-provider = TeamsPresenceProvider(client_id=CLIENT_ID, tenant_id=TENANT_ID, cache_file=...)
-
-# With:
-from providers.slack.slack_presence_provider import SlackPresenceProvider
-provider = SlackPresenceProvider(slack_token=os.getenv("SLACK_TOKEN"))
-```
-
-No other files need to change. The engine, quiet hours, adaptive polling — everything just works.
-
-### Adding a New Light Controller
-
-For example, adding **TP-Link Tapo** bulb support:
-
-**Step 1** — Create the module:
-```
-src/lights/tplink/__init__.py
-src/lights/tplink/tplink_light_controller.py
-```
-
-**Step 2** — Subclass `BaseLightController`:
-```python
-from core.base_light_controller import BaseLightController
-
-class TplinkLightController(BaseLightController):
-    """Controls a TP-Link Tapo smart bulb."""
-
-    STATUS_MAP: dict = {
-        "Available":  {"color": "green",  "brightness": 70},
-        "Busy":       {"color": "red",    "brightness": 100},
-        "Away":       {"color": "yellow", "brightness": 50},
-        "Offline":    None,  # None = turn off
-        # ... add all statuses your provider returns
-    }
-
-    def __init__(self, bulb_ip: str, username: str, password: str):
-        self._bulb_ip  = bulb_ip
-        self._username = username
-        self._password = password
-        self._bulb     = None  # Lazy init!
-
-    async def apply_status(self, status: str) -> None:
-        config = self.STATUS_MAP.get(status)
-        if config is None:
-            await self.turn_off()
-        else:
-            # Use PyP100 or similar SDK to set color
-            ...
-
-    async def turn_off(self) -> None:
-        # Turn off the bulb
-        ...
-
-    async def cleanup(self) -> None:
-        # Close connections
-        ...
-```
-
-> ⚠️ **Important:** Do **NOT** instantiate hardware SDK objects in `__init__()`. Create them lazily on the first async call. This avoids the asyncio `"Future attached to a different loop"` error. See `WizLightController._get_light()` for the established pattern.
-
-**Step 3** — Wire it up in `src/main.py`:
-```python
-from lights.tplink.tplink_light_controller import TplinkLightController
-controller = TplinkLightController(bulb_ip=BULB_IP, username=..., password=...)
-```
-
-### Key Design Rules for Contributors
-
-1. **`STATUS_MAP` keys must match `get_status()` return values.** The engine passes availability strings directly from the provider into `controller.apply_status()`. If the keys don't align, the bulb turns off (safe default).
-
-2. **Lazy initialization for hardware SDKs.** Any bulb SDK that uses asyncio must be instantiated inside the event loop, not in `__init__()`.
-
-3. **Signal token expiry via `RuntimeError("Token expired")`** in your provider's `get_status()`. The engine catches this specific string and calls `on_token_expired()`.
-
-4. **`config.py` must be imported first** in `main.py` (before any `print()` calls) because it patches `builtins.print` globally to add timestamps.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for full step-by-step guides with complete code examples.
 
 ---
 
@@ -402,7 +291,7 @@ controller = TplinkLightController(bulb_ip=BULB_IP, username=..., password=...)
 
 ## 📄 License
 
-This project is open source. Feel free to use, modify, and contribute.
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
@@ -410,7 +299,7 @@ This project is open source. Feel free to use, modify, and contribute.
 
 Contributions are welcome! Whether it's a new presence provider (Slack, Zoom, Google Chat), a new light controller (TP-Link, Govee, LIFX), or improvements to the core engine — PRs are appreciated.
 
-See [`AGENTS.md`](AGENTS.md) for detailed architecture context and contribution guidelines.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for full contribution guides with code examples, and [`AGENTS.md`](AGENTS.md) for architecture context.
 
 ---
 

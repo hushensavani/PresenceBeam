@@ -44,7 +44,9 @@ PresenceBeam/
 ├── docker-compose.yml       # Reads .env via env_file; mounts ./data:/app/data
 ├── requirements.txt         # pip dependencies
 ├── .env.example             # Template — copy to .env and fill in secrets
-└── .gitignore               # Excludes .env, .venv, data cache, __pycache__
+├── .gitignore               # Excludes .env, .venv, data cache, __pycache__
+├── CONTRIBUTING.md          # How to add new providers and light controllers
+└── LICENSE                  # MIT
 ```
 
 ---
@@ -174,94 +176,11 @@ them without baking secrets into the image.
 
 ---
 
-## How to Add a New Presence Provider
+## Adding New Providers or Controllers
 
-Example: adding Slack.
-
-**Step 1** — Create the module:
-```
-src/providers/slack/__init__.py
-src/providers/slack/slack_presence_provider.py
-```
-
-**Step 2** — Subclass `BasePresenceProvider`:
-```python
-from core.base_presence_provider import BasePresenceProvider
-
-class SlackPresenceProvider(BasePresenceProvider):
-    NON_CRITICAL_STATUSES: set[str] = {"active"}
-
-    def authenticate(self) -> None:
-        # Use Slack SDK or OAuth token from env
-        ...
-
-    def get_status(self) -> tuple[str, str]:
-        # Call Slack API, return (availability, activity)
-        # Raise RuntimeError("Token expired") on 401
-        ...
-```
-
-**Step 3** — Update `src/main.py` (two lines):
-```python
-# Replace:
-from providers.ms_teams.teams_presence_provider import TeamsPresenceProvider
-provider = TeamsPresenceProvider(...)
-
-# With:
-from providers.slack.slack_presence_provider import SlackPresenceProvider
-provider = SlackPresenceProvider(...)
-```
-
-No other files need to change.
-
----
-
-## How to Add a New Light Controller
-
-Example: adding TP-Link Tapo.
-
-**Step 1** — Create the module:
-```
-src/lights/tplink/__init__.py
-src/lights/tplink/tplink_light_controller.py
-```
-
-**Step 2** — Subclass `BaseLightController`:
-```python
-from core.base_light_controller import BaseLightController
-
-class TplinkLightController(BaseLightController):
-    STATUS_MAP: dict = {
-        "Available": {"color": "green", "brightness": 70},
-        "Busy":      {"color": "red",   "brightness": 100},
-        "Offline":   None,
-        # ...
-    }
-
-    async def apply_status(self, status: str) -> None:
-        config = self.STATUS_MAP.get(status)
-        if config is None:
-            await self.turn_off()
-        else:
-            # Use PyP100 / tplink-smarthome-api or similar
-            ...
-
-    async def turn_off(self) -> None:
-        ...
-
-    async def cleanup(self) -> None:
-        ...
-```
-
-> ⚠️ **Important:** Do NOT instantiate hardware SDK objects in `__init__()`.
-> Create them lazily on first async call to avoid the asyncio "Future attached
-> to a different loop" error (same pattern as `WizLightController._get_light()`).
-
-**Step 3** — Update `src/main.py` (two lines):
-```python
-from lights.tplink.tplink_light_controller import TplinkLightController
-controller = TplinkLightController(...)
-```
+For step-by-step guides with full code examples for adding new presence providers
+(Slack, Zoom, Google Chat…) or new light controllers (TP-Link Tapo, Govee, LIFX…),
+see [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ---
 
