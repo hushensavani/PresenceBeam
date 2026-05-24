@@ -7,7 +7,7 @@
 [![Python](https://img.shields.io/badge/python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker&logoColor=white)](https://hub.docker.com/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![GitHub stars](https://img.shields.io/github/stars/hushensavani/PresenceBeam?style=social)](https://github.com/hushensavani/PresenceBeam/stargazers)
+[![GitHub stars](https://img.shields.io/github/stars/hushensavani/PresenceBeam?style=flat&logo=github)](https://github.com/hushensavani/PresenceBeam/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/hushensavani/PresenceBeam)](https://github.com/hushensavani/PresenceBeam/issues)
 [![Last commit](https://img.shields.io/github/last-commit/hushensavani/PresenceBeam)](https://github.com/hushensavani/PresenceBeam/commits/master)
 
