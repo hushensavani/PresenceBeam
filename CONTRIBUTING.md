@@ -1,6 +1,6 @@
 # Contributing to PresenceBeam
 
-Thank you for your interest in contributing! PresenceBeam is designed from the ground up to be extended — adding a new communication platform or a new smart bulb is a focused, self-contained task that doesn't require touching the core engine at all.
+Thank you for your interest in contributing! PresenceBeam gives people outside your work room a real-time view of your availability — so they know not to knock when you're in a call. It is designed from the ground up to be extended: adding a new communication platform or a new smart bulb is a focused, self-contained task that doesn't require touching the core engine at all.
 
 This guide walks you through everything you need to know.
 

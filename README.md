@@ -1,6 +1,6 @@
 # 🗨️ PresenceBeam 🟢💡
 
-**Turn your smart bulb into a real-time status indicator for your workplace communication app.**
+**A smart bulb outside your work room that lets people nearby know when you're free — automatically synced to your Teams status.**
 
 [![CI](https://github.com/hushensavani/PresenceBeam/actions/workflows/build.yml/badge.svg)](https://github.com/hushensavani/PresenceBeam/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -11,7 +11,7 @@
 [![GitHub issues](https://img.shields.io/github/issues/hushensavani/PresenceBeam)](https://github.com/hushensavani/PresenceBeam/issues)
 [![Last commit](https://img.shields.io/github/last-commit/hushensavani/PresenceBeam)](https://github.com/hushensavani/PresenceBeam/commits/master)
 
-PresenceBeam is an open-source daemon that polls your availability status from a communication platform (e.g. Microsoft Teams) and reflects it in real-time on a smart light bulb (e.g. Philips WiZ). When you're in a call, the bulb blinks red. When you're available, it glows green. When you go offline, it turns off.
+Place a smart bulb outside your work room. PresenceBeam keeps it in sync with your Microsoft Teams presence so that anyone nearby — family, roommates, colleagues — can see at a glance when it's a good time to knock. Glows green when you're free. Dims when you're away. Blinks red when you're in a call.
 
 Built with an extensible, provider-agnostic architecture — adding support for Slack, Zoom, TP-Link Tapo, Govee, or any other platform/bulb is as simple as adding a single class.
 

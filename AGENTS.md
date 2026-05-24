@@ -7,10 +7,12 @@ Read this file before making any code changes.
 
 ## Project Overview
 
-**PresenceBeam** is an open-source, extensible daemon that polls a user's
-availability status from a workplace communication platform (e.g. Microsoft Teams,
-Slack) and reflects that status in real-time on a smart light bulb (e.g. Philips
-WiZ, TP-Link Tapo, Govee).
+**PresenceBeam** is an open-source, extensible daemon that syncs a user's
+presence status from a workplace communication platform (e.g. Microsoft Teams,
+Slack) to a smart light bulb (e.g. Philips WiZ, TP-Link Tapo, Govee) placed
+outside their work room. The bulb acts as a physical "do not disturb" signal
+for others nearby — family, roommates, or colleagues — so they know at a glance
+whether it is safe to knock without interrupting a call or meeting.
 
 The project is deliberately **provider-agnostic** and **controller-agnostic**. The
 core engine contains zero platform-specific or bulb-specific code. All concrete
