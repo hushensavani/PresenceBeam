@@ -15,6 +15,8 @@ Place a smart bulb outside your work room. PresenceBeam keeps it in sync with yo
 
 Built with an extensible, provider-agnostic architecture — adding support for Slack, Zoom, TP-Link Tapo, Govee, or any other platform/bulb is as simple as adding a single class.
 
+🌐 **[hushensavani.github.io/PresenceBeam](https://hushensavani.github.io/PresenceBeam/)**
+
 ---
 
 ## ✨ Features
